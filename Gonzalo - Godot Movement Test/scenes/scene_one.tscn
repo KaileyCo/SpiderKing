@@ -8,7 +8,7 @@
 blend_mode = 1
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cf7qs"]
-size = Vector2(1163, 48)
+size = Vector2(2563.5, 48)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_0tnrl"]
 
@@ -17,24 +17,43 @@ size = Vector2(87, 244)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_cf7qs"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cop04"]
+size = Vector2(40, 644.5)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_cop04"]
+
 [node name="SceneOne" type="Node2D" unique_id=233813023]
+
+[node name="Player" parent="." unique_id=1177396484 instance=ExtResource("1_11pc1")]
+position = Vector2(215, 392)
+scale = Vector2(0.5, 0.5)
 
 [node name="Floor" type="StaticBody2D" parent="." unique_id=1084042524]
 material = SubResource("CanvasItemMaterial_11pc1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=854646081]
 material = SubResource("CanvasItemMaterial_lafl4")
-position = Vector2(576, 628)
+position = Vector2(1276.25, 628)
 shape = SubResource("RectangleShape2D_cf7qs")
 
 [node name="Sprite2D" type="Sprite2D" parent="Floor" unique_id=1913766332]
-position = Vector2(577.6446, 626.93256)
-scale = Vector2(-1158.892, 44.26843)
+position = Vector2(1274.5488, 626.93256)
+scale = Vector2(-2552.7007, 44.26843)
 texture = SubResource("CanvasTexture_0tnrl")
 
-[node name="Player" parent="." unique_id=1177396484 instance=ExtResource("1_11pc1")]
-position = Vector2(215, 392)
-scale = Vector2(0.5, 0.5)
+[node name="Roof" type="StaticBody2D" parent="." unique_id=105670485]
+material = SubResource("CanvasItemMaterial_11pc1")
+position = Vector2(5, -614)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Roof" unique_id=1239300406]
+material = SubResource("CanvasItemMaterial_lafl4")
+position = Vector2(1276.25, 628)
+shape = SubResource("RectangleShape2D_cf7qs")
+
+[node name="Sprite2D" type="Sprite2D" parent="Roof" unique_id=648717556]
+position = Vector2(1274.5488, 626.93256)
+scale = Vector2(-2552.7007, 44.26843)
+texture = SubResource("CanvasTexture_0tnrl")
 
 [node name="Wall" type="StaticBody2D" parent="." unique_id=488922243]
 position = Vector2(-4, 359)
@@ -61,3 +80,27 @@ modulate = Color(0, 0.25490198, 1, 1)
 position = Vector2(44.75, 121.74999)
 scale = Vector2(86.5, 244.49998)
 texture = SubResource("CanvasTexture_cf7qs")
+
+[node name="Border" type="StaticBody2D" parent="." unique_id=249138189]
+position = Vector2(18, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Border" unique_id=1219733507]
+position = Vector2(-24, 326.25)
+shape = SubResource("RectangleShape2D_cop04")
+
+[node name="Sprite2D" type="Sprite2D" parent="Border" unique_id=1218593799]
+position = Vector2(-23.846598, 326.8093)
+scale = Vector2(-36.42653, 644.3518)
+texture = SubResource("CanvasTexture_cop04")
+
+[node name="Border2" type="StaticBody2D" parent="." unique_id=1622345134]
+position = Vector2(2590, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Border2" unique_id=1152144230]
+position = Vector2(-24, 326.25)
+shape = SubResource("RectangleShape2D_cop04")
+
+[node name="Sprite2D" type="Sprite2D" parent="Border2" unique_id=241099368]
+position = Vector2(-23.846598, 326.8093)
+scale = Vector2(-36.42653, 644.3518)
+texture = SubResource("CanvasTexture_cop04")

@@ -2,6 +2,7 @@
 Repository for game project
 
 comit from victor
+push from Gonzalo
 
 commit from Kailey
 

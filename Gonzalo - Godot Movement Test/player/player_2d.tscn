@@ -6,10 +6,22 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0tnrl"]
 size = Vector2(128, 128)
 
+[sub_resource type="SpriteFrames" id="SpriteFrames_0tnrl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_wtcfe")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]
+
 [node name="Player" type="CharacterBody2D" unique_id=1177396484]
 script = ExtResource("1_u8lj1")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=187579558]
+visible = false
 position = Vector2(498, 341)
 texture = ExtResource("1_wtcfe")
 
@@ -21,3 +33,17 @@ shape = SubResource("RectangleShape2D_0tnrl")
 position = Vector2(496, 233)
 drag_horizontal_enabled = true
 drag_vertical_enabled = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=143304947]
+position = Vector2(498, 341)
+sprite_frames = SubResource("SpriteFrames_0tnrl")
+
+[node name="GrappleOrigin" type="Marker2D" parent="." unique_id=220797249]
+position = Vector2(500, 375)
+
+[node name="GrappleRay" type="RayCast2D" parent="GrappleOrigin" unique_id=214956408]
+position = Vector2(-1, -28)
+
+[node name="GrappleRope" type="Line2D" parent="." unique_id=565492780]
+position = Vector2(500, 375)
+width = 3.0

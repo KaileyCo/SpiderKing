@@ -25,7 +25,7 @@ size = Vector2(40, 644.5)
 [node name="SceneOne" type="Node2D" unique_id=233813023]
 
 [node name="Player" parent="." unique_id=1177396484 instance=ExtResource("1_11pc1")]
-position = Vector2(215, 392)
+position = Vector2(298, 390)
 scale = Vector2(0.5, 0.5)
 
 [node name="Floor" type="StaticBody2D" parent="." unique_id=1084042524]

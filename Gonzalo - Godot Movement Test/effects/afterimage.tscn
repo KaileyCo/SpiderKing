@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://d4mfv6hjqowql"]
+
+[ext_resource type="Script" uid="uid://ds1385cw4euyo" path="res://effects/afterimage.gd" id="1_n0qqs"]
+
+[node name="Afterimage" type="Sprite2D" unique_id=1547449172]
+script = ExtResource("1_n0qqs")

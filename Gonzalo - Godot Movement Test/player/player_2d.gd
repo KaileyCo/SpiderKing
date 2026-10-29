@@ -7,7 +7,7 @@ const JUMP_VELOCITY = -400.0  # Power of the jump (negative y means up in godot)
 # How quickly players reaches top speed or stops
 # Time to reach top speed or stop: (Speed / Accel or Deccel)
 const ACCELERATION = 2400.0
-const DECELERATION = 3000.0
+const DECELERATION = 2500.0
 
 const DASH_SPEED = 700.0   # How fast the dash is
 const DASH_DURATION = 0.15 # How long the dash lasts
@@ -26,11 +26,11 @@ const AFTERIMAGE_SCENE: PackedScene = preload(
 const AFTERIMAGE_INTERVAL = 0.04
 
 const GRAPPLE_MAX_DISTANCE = 2000.0
-const GRAPPLE_HOOK_SPEED = 1200.0
-const GRAPPLE_PULL_SPEED = 900.0
+const GRAPPLE_HOOK_SPEED = 3200.0
+const GRAPPLE_PULL_SPEED = 1000.0
 
-const GRAPPLE_SURFACE_OFFSET = 5.0
-const GRAPPLE_ARRIVAL_DISTANCE = 5.0
+const GRAPPLE_SURFACE_OFFSET = 0
+const GRAPPLE_ARRIVAL_DISTANCE = 0
 
 enum GrappleState {IDLE,FIRING,PULLING}
 
@@ -75,7 +75,7 @@ func _physics_process(delta: float) -> void:
 		if grapple_state == GrappleState.IDLE:
 			try_start_grapple()
 		else:
-			stop_grapple()
+			stop_grapple(true)
 	
 	# Move the hook while it is being fired.
 	if grapple_state == GrappleState.FIRING:
@@ -192,6 +192,10 @@ func try_start_grapple() -> void:
 		"move_up",
 		"move_down"
 	)
+	
+	var grapple_origin_offset := (
+	grapple_origin.global_position - global_position
+	)
 
 	# If no direction is held, grapple horizontally toward
 	# the direction the player last faced.
@@ -212,8 +216,9 @@ func try_start_grapple() -> void:
 	var surface_normal := grapple_ray.get_collision_normal()
 
 	grapple_destination = (
-		grapple_hit_point
-		+ surface_normal * GRAPPLE_SURFACE_OFFSET
+	grapple_hit_point
+	+ surface_normal * GRAPPLE_SURFACE_OFFSET
+	- grapple_origin_offset
 	)
 
 	hook_position = grapple_origin.global_position
@@ -248,10 +253,12 @@ func handle_grapple_pull() -> void:
 
 	velocity = pull_direction * GRAPPLE_PULL_SPEED
 
-func stop_grapple() -> void:
+func stop_grapple(preserve_velocity: bool = false) -> void:
 	grapple_state = GrappleState.IDLE
 	grapple_rope.hide()
-	velocity = Vector2.ZERO
+
+	if not preserve_velocity:
+		velocity = Vector2.ZERO
 
 func update_grapple_rope() -> void:
 	if grapple_state == GrappleState.IDLE:

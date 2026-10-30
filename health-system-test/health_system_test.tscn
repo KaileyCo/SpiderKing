@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://b20yahn7avxgp"]
+
+[ext_resource type="Script" uid="uid://4b4qvei6gfig" path="res://health_system_test.gd" id="1_l4oul"]
+[ext_resource type="Script" uid="uid://bx1ttnk5y50ok" path="res://health.gd" id="1_nj0oi"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l4oul"]
+bg_color = Color(0.32156864, 0.83137256, 0.2901961, 1)
+
+[node name="HealthSystemTest" type="Node2D" unique_id=1780397486]
+script = ExtResource("1_l4oul")
+
+[node name="Health" type="Node" parent="." unique_id=1824458147]
+script = ExtResource("1_nj0oi")
+
+[node name="Ui" type="CanvasLayer" parent="." unique_id=1285780880]
+
+[node name="HealthBar" type="ProgressBar" parent="Ui" unique_id=1894682217]
+anchors_preset = -1
+anchor_right = 0.27100003
+anchor_bottom = 0.113000005
+offset_left = 117.0
+offset_top = 73.0
+offset_right = 54.807983
+offset_bottom = 29.775993
+theme_override_styles/fill = SubResource("StyleBoxFlat_l4oul")
+value = 100.0

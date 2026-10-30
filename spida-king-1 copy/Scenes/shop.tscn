@@ -1,0 +1,157 @@
+[gd_scene format=3 uid="uid://dwlyt84c0e15a"]
+
+[ext_resource type="Script" uid="uid://dw3rbjt1vgssg" path="res://Scripts/shop.gd" id="1_a0mxf"]
+[ext_resource type="Texture2D" uid="uid://c23whcyxoioul" path="res://sprites/fruit.png" id="2_2shtd"]
+
+[sub_resource type="Animation" id="Animation_6mhmv"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, -550)]
+}
+
+[sub_resource type="Animation" id="Animation_a0mxf"]
+resource_name = "TransIn"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, -550), Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_2shtd"]
+resource_name = "TransOut"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -600)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_io27d"]
+_data = {
+&"RESET": SubResource("Animation_6mhmv"),
+&"TransIn": SubResource("Animation_a0mxf"),
+&"TransOut": SubResource("Animation_2shtd")
+}
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_io27d"]
+atlas = ExtResource("2_2shtd")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fdj0q"]
+atlas = ExtResource("2_2shtd")
+region = Rect2(32, 48, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k6jq0"]
+atlas = ExtResource("2_2shtd")
+region = Rect2(16, 32, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0uuf2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_io27d")
+}],
+"loop": 1,
+"name": &"fruit1",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fdj0q")
+}],
+"loop": 1,
+"name": &"fruit2",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k6jq0")
+}],
+"loop": 1,
+"name": &"fruit3",
+"speed": 5.0
+}]
+
+[node name="Shop" type="CanvasLayer" unique_id=1495143492]
+process_mode = 2
+offset = Vector2(0, -550)
+transform = Transform2D(1, 0, 0, 1, 0, -550)
+script = ExtResource("1_a0mxf")
+
+[node name="Panel" type="Panel" parent="." unique_id=1687040448]
+offset_left = 208.0
+offset_top = 96.0
+offset_right = 952.0
+offset_bottom = 498.0
+
+[node name="Anim" type="AnimationPlayer" parent="." unique_id=1245878140]
+libraries/ = SubResource("AnimationLibrary_io27d")
+
+[node name="Close" type="Button" parent="." unique_id=1309063482]
+offset_left = 832.0
+offset_top = 120.0
+offset_right = 936.0
+offset_bottom = 160.0
+text = "Close"
+
+[node name="Control" type="Control" parent="." unique_id=1266949220]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="AnimSprite" type="AnimatedSprite2D" parent="Control" unique_id=751946267]
+position = Vector2(336.00003, 264)
+scale = Vector2(10, 10)
+sprite_frames = SubResource("SpriteFrames_0uuf2")
+animation = &"fruit1"
+
+[node name="Label" type="Label" parent="Control" unique_id=1559379624]
+layout_mode = 0
+offset_left = 504.0
+offset_top = 168.0
+offset_right = 656.0
+offset_bottom = 191.0
+text = "Name"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Description" type="Label" parent="Control" unique_id=642355503]
+layout_mode = 0
+offset_left = 456.0
+offset_top = 352.0
+offset_right = 724.0
+offset_bottom = 401.0
+text = "PLACE HOLDER TEST Y JHDBW BHD"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Buy" type="Button" parent="Control" unique_id=60982800]
+layout_mode = 0
+offset_left = 296.0
+offset_top = 336.0
+offset_right = 376.0
+offset_bottom = 368.0
+text = "Purchase"
+
+[connection signal="pressed" from="Close" to="." method="_on_close_pressed"]

@@ -32,7 +32,10 @@ const GRAPPLE_PULL_SPEED = 1000.0
 const GRAPPLE_SURFACE_OFFSET = 0
 const GRAPPLE_ARRIVAL_DISTANCE = 0
 
-enum GrappleState {IDLE,FIRING,PULLING}
+const SWING_INPUT_ACCELERATION = 800.0
+const SWING_MAX_SPEED = 1200.0
+
+enum GrappleState {IDLE,FIRING,PULLING,SWINGING}
 
 # Initialized player values
 var facing_direction: float = 1.0 # Direction player faces (-1: left and 1: right)
@@ -53,6 +56,8 @@ var grapple_state: int = GrappleState.IDLE
 var grapple_hit_point: Vector2
 var grapple_destination: Vector2
 var hook_position: Vector2
+var grapple_should_pull: bool = true
+var grapple_rope_length: float = 0.0
 
 
 func _physics_process(delta: float) -> void:
@@ -71,9 +76,17 @@ func _physics_process(delta: float) -> void:
 	if wall_jump_control_time > 0:
 		wall_jump_control_time -= delta
 	
+	# When grapple input (alt) is pressed
 	if Input.is_action_just_pressed("grapple"):
+		if grapple_state == GrappleState.IDLE: # If not currently grappling
+			try_start_grapple(true) # True tells it to bring player towards destination
+		else: # If currently grappling
+			stop_grapple(true) # True keeps momentum from grapple
+
+	# When grapple2 input (ctrl) is pressed
+	if Input.is_action_just_pressed("grapple2"):
 		if grapple_state == GrappleState.IDLE:
-			try_start_grapple()
+			try_start_grapple(false) # False means Spider-Man web swinging
 		else:
 			stop_grapple(true)
 	
@@ -85,14 +98,43 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("shift"):
 		try_start_dash(direction)
 
+	# All currently possible movement states
 	if grapple_state == GrappleState.PULLING:
-		handle_grapple_pull()
+		handle_grapple_pull() # If being pulled by grapple
+	elif grapple_state == GrappleState.SWINGING:
+		handle_grapple_swing(direction, delta) # If swing via grapple
+		update_swing_rotation(delta)
 	elif dash_time_remaining > 0:
-		handle_dash(delta)
+		handle_dash(delta) # If dashing
 	else:
-		handle_normal_movement(direction, delta)
+		handle_normal_movement(direction, delta) # Normal movement
 
 	move_and_slide() # Godot movement, handles collisions
+	
+	# Bunch of code to keep grapple length the same when swinging
+	if grapple_state == GrappleState.SWINGING:
+		# Create a vector from the start of the grapple to its collision point
+		var rope_vector := (
+			grapple_origin.global_position
+			- grapple_hit_point
+		)
+
+		# Get the length of the vector
+		var current_rope_length := rope_vector.length()
+
+		# Make sure grapple doesn't become longer while swinging
+		if current_rope_length > grapple_rope_length:
+			# Get the difference from current distance to allowed distance
+			var extra_distance := (
+				current_rope_length - grapple_rope_length
+			)
+
+			# Get rid of the extra distance
+			global_position -= (
+				rope_vector.normalized()
+				* extra_distance
+			)
+	
 	update_grapple_rope()
 
 func create_afterimage() -> void:
@@ -119,7 +161,7 @@ func handle_dash(delta: float) -> void:
 	afterimage_time_remaining -= delta
 
 	velocity.x = dash_direction * DASH_SPEED # Dash speed
-	velocity.y = 0.0
+	velocity.y = 0.0 # Not falling or rising
 	if afterimage_time_remaining <= 0:
 		create_afterimage()
 		afterimage_time_remaining = AFTERIMAGE_INTERVAL
@@ -146,6 +188,7 @@ func handle_normal_movement(direction: float, delta: float) -> void:
 			air_dash_available = true
 
 	# Normal horizontal movement briefly disabled after a wall jump.
+	# Creates that "bounce" off the wall
 	if wall_jump_control_time <= 0:
 		if direction != 0:
 			var target_velocity := direction * SPEED
@@ -185,7 +228,8 @@ func try_start_dash(direction: float) -> void:
 	if not is_on_floor():
 		air_dash_available = false
 
-func try_start_grapple() -> void:
+func try_start_grapple(should_pull: bool) -> void:
+	# Gets direction based on movement inputs
 	var aim_direction := Input.get_vector(
 		"move_left",
 		"move_right",
@@ -210,6 +254,8 @@ func try_start_grapple() -> void:
 
 	if not grapple_ray.is_colliding():
 		return
+	
+	grapple_should_pull = should_pull
 
 	grapple_hit_point = grapple_ray.get_collision_point()
 
@@ -233,10 +279,16 @@ func handle_grapple_shot(delta: float) -> void:
 
 	if hook_position.distance_to(grapple_hit_point) <= 1.0:
 		hook_position = grapple_hit_point
-		grapple_state = GrappleState.PULLING
-
-		# Cancel any dash when pulling begins.
 		dash_time_remaining = 0.0
+
+		if grapple_should_pull:
+			grapple_state = GrappleState.PULLING
+		else:
+			grapple_state = GrappleState.SWINGING
+
+	grapple_rope_length = grapple_origin.global_position.distance_to(
+		grapple_hit_point
+	)
 
 func handle_grapple_pull() -> void:
 	var distance_to_destination := global_position.distance_to(
@@ -256,6 +308,9 @@ func handle_grapple_pull() -> void:
 func stop_grapple(preserve_velocity: bool = false) -> void:
 	grapple_state = GrappleState.IDLE
 	grapple_rope.hide()
+	
+	# Character sprite no longer rotated
+	animated_sprite.rotation = 0.0
 
 	if not preserve_velocity:
 		velocity = Vector2.ZERO
@@ -268,3 +323,50 @@ func update_grapple_rope() -> void:
 		grapple_rope.to_local(grapple_origin.global_position),
 		grapple_rope.to_local(hook_position)
 	])
+	
+	
+func handle_grapple_swing(direction: float, delta: float) -> void:
+	# Gravity creates the pendulum motion.
+	velocity += get_gravity() * delta
+
+	# Allow some horizontal input to help pump the swing.
+	velocity.x += (
+		direction
+		* SWING_INPUT_ACCELERATION
+		* delta
+	)
+
+	var anchor_to_player := (
+		grapple_origin.global_position
+		- grapple_hit_point
+	)
+
+	if anchor_to_player.length() > 0:
+		var radial_direction := anchor_to_player.normalized()
+
+		# Find how much velocity points along the rope.
+		var radial_velocity := velocity.dot(radial_direction)
+
+		# Remove movement toward or away from the hook,
+		# leaving movement around the hook.
+		velocity -= radial_direction * radial_velocity
+
+	velocity = velocity.limit_length(SWING_MAX_SPEED)
+
+func update_swing_rotation(delta: float) -> void:
+	# Get direction from player to grapple
+	var direction_to_hook := (
+		grapple_hit_point
+		- grapple_origin.global_position
+	).normalized()
+
+	# angle() treats right as zero degrees.
+	# Adding PI / 2 keeps an upright sprite upright when the hook is above it.
+	var target_rotation := direction_to_hook.angle() + PI / 2.0
+
+	# Rotate toward the rope's angle.
+	animated_sprite.rotation = lerp_angle(
+		animated_sprite.rotation,
+		target_rotation,
+		12.0 * delta
+	)

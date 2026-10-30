@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://c5yb72ufw3txt"
+path="res://.godot/imported/Spider Dance - Toby Fox.ogg-c4464a9a3941bbfb102e0a7a4e8fb30d.oggvorbisstr"
+
+[deps]
+
+source_file="res://audio/Spider Dance - Toby Fox.ogg"
+dest_files=["res://.godot/imported/Spider Dance - Toby Fox.ogg-c4464a9a3941bbfb102e0a7a4e8fb30d.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

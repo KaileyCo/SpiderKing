@@ -22,6 +22,10 @@ size = Vector2(40, 644.5)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_cop04"]
 
+[sub_resource type="CanvasTexture" id="CanvasTexture_owx78"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x0ysr"]
+
 [node name="SceneOne" type="Node2D" unique_id=233813023]
 
 [node name="Player" parent="." unique_id=1177396484 instance=ExtResource("1_11pc1")]
@@ -104,3 +108,16 @@ shape = SubResource("RectangleShape2D_cop04")
 position = Vector2(-23.846598, 326.8093)
 scale = Vector2(-36.42653, 644.3518)
 texture = SubResource("CanvasTexture_cop04")
+
+[node name="Block" type="StaticBody2D" parent="." unique_id=935149311]
+position = Vector2(1700, 320)
+scale = Vector2(2, 2)
+
+[node name="Sprite2D" type="Sprite2D" parent="Block" unique_id=1884919264]
+modulate = Color(0, 0, 1, 1)
+position = Vector2(-1.9073486e-06, -1.9073486e-06)
+scale = Vector2(20.000004, 20.000004)
+texture = SubResource("CanvasTexture_owx78")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Block" unique_id=9686884]
+shape = SubResource("RectangleShape2D_x0ysr")

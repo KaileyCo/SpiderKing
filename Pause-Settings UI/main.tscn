@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://d1pprs3ii0fpq"]
+
+[ext_resource type="Script" uid="uid://f1akrqbyxqg7" path="res://main.gd" id="1_1n156"]
+[ext_resource type="PackedScene" uid="uid://bsgdiebp8bf8g" path="res://pause_menu.tscn" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://mbhif8marjjc" path="res://settings_menu.tscn" id="3_h2yge"]
+
+[node name="Main" type="Node2D" unique_id=1313088082]
+script = ExtResource("1_1n156")
+
+[node name="PauseMenu" parent="." unique_id=1199802062 instance=ExtResource("2_0xm2m")]
+visible = false
+offset_left = 220.0
+offset_top = 89.0
+offset_right = 220.0
+offset_bottom = 89.0
+scale = Vector2(0.563899, 0.65684885)
+
+[node name="SettingsMenu" parent="." unique_id=1018642758 instance=ExtResource("3_h2yge")]
+visible = false
+offset_left = 3.0517578e-05
+offset_top = -1.0
+offset_right = 3.0517578e-05
+offset_bottom = -1.0

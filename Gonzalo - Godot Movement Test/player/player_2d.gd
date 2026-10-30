@@ -103,6 +103,7 @@ func _physics_process(delta: float) -> void:
 		handle_grapple_pull() # If being pulled by grapple
 	elif grapple_state == GrappleState.SWINGING:
 		handle_grapple_swing(direction, delta) # If swing via grapple
+		update_swing_rotation(delta)
 	elif dash_time_remaining > 0:
 		handle_dash(delta) # If dashing
 	else:
@@ -160,7 +161,7 @@ func handle_dash(delta: float) -> void:
 	afterimage_time_remaining -= delta
 
 	velocity.x = dash_direction * DASH_SPEED # Dash speed
-	velocity.y = 0.0
+	velocity.y = 0.0 # Not falling or rising
 	if afterimage_time_remaining <= 0:
 		create_afterimage()
 		afterimage_time_remaining = AFTERIMAGE_INTERVAL
@@ -187,6 +188,7 @@ func handle_normal_movement(direction: float, delta: float) -> void:
 			air_dash_available = true
 
 	# Normal horizontal movement briefly disabled after a wall jump.
+	# Creates that "bounce" off the wall
 	if wall_jump_control_time <= 0:
 		if direction != 0:
 			var target_velocity := direction * SPEED
@@ -227,6 +229,7 @@ func try_start_dash(direction: float) -> void:
 		air_dash_available = false
 
 func try_start_grapple(should_pull: bool) -> void:
+	# Gets direction based on movement inputs
 	var aim_direction := Input.get_vector(
 		"move_left",
 		"move_right",
@@ -305,6 +308,9 @@ func handle_grapple_pull() -> void:
 func stop_grapple(preserve_velocity: bool = false) -> void:
 	grapple_state = GrappleState.IDLE
 	grapple_rope.hide()
+	
+	# Character sprite no longer rotated
+	animated_sprite.rotation = 0.0
 
 	if not preserve_velocity:
 		velocity = Vector2.ZERO
@@ -346,3 +352,21 @@ func handle_grapple_swing(direction: float, delta: float) -> void:
 		velocity -= radial_direction * radial_velocity
 
 	velocity = velocity.limit_length(SWING_MAX_SPEED)
+
+func update_swing_rotation(delta: float) -> void:
+	# Get direction from player to grapple
+	var direction_to_hook := (
+		grapple_hit_point
+		- grapple_origin.global_position
+	).normalized()
+
+	# angle() treats right as zero degrees.
+	# Adding PI / 2 keeps an upright sprite upright when the hook is above it.
+	var target_rotation := direction_to_hook.angle() + PI / 2.0
+
+	# Rotate toward the rope's angle.
+	animated_sprite.rotation = lerp_angle(
+		animated_sprite.rotation,
+		target_rotation,
+		12.0 * delta
+	)

@@ -35,7 +35,7 @@ const GRAPPLE_ARRIVAL_DISTANCE = 0
 const SWING_INPUT_ACCELERATION = 800.0
 const SWING_MAX_SPEED = 1200.0
 
-enum GrappleState {IDLE,FIRING,PULLING,SWINGING}
+enum GrappleState {IDLE,FIRING,RETRACTING,PULLING,SWINGING}
 
 # Initialized player values
 var facing_direction: float = 1.0 # Direction player faces (-1: left and 1: right)
@@ -53,6 +53,7 @@ var afterimage_time_remaining: float = 0.0
 @onready var grapple_rope: Line2D = $GrappleRope
 
 var grapple_state: int = GrappleState.IDLE
+var grapple_found_target: bool = false
 var grapple_hit_point: Vector2
 var grapple_destination: Vector2
 var hook_position: Vector2
@@ -93,6 +94,10 @@ func _physics_process(delta: float) -> void:
 	# Move the hook while it is being fired.
 	if grapple_state == GrappleState.FIRING:
 		handle_grapple_shot(delta)
+
+	# Bring back a grapple that missed.
+	elif grapple_state == GrappleState.RETRACTING:
+		handle_grapple_retraction(delta)
 
 	# Attempt to begin a dash.
 	if Input.is_action_just_pressed("shift"):
@@ -252,43 +257,83 @@ func try_start_grapple(should_pull: bool) -> void:
 
 	grapple_ray.force_raycast_update()
 
-	if not grapple_ray.is_colliding():
-		return
-	
 	grapple_should_pull = should_pull
 
-	grapple_hit_point = grapple_ray.get_collision_point()
+	# Remember whether the ray found a grapple surface.
+	grapple_found_target = grapple_ray.is_colliding()
 
-	var surface_normal := grapple_ray.get_collision_normal()
+	if grapple_found_target:
+		# The grapple will travel toward the collision point.
+		grapple_hit_point = grapple_ray.get_collision_point()
 
-	grapple_destination = (
-	grapple_hit_point
-	+ surface_normal * GRAPPLE_SURFACE_OFFSET
-	- grapple_origin_offset
-	)
+		var surface_normal := grapple_ray.get_collision_normal()
 
+		grapple_destination = (
+			grapple_hit_point
+			+ surface_normal * GRAPPLE_SURFACE_OFFSET
+			- grapple_origin_offset
+		)
+	else:
+		# Nothing was hit, so use the end of the RayCast2D
+		# as the grapple's visual destination.
+		grapple_hit_point = grapple_ray.to_global(
+			grapple_ray.target_position
+		)
+
+	# Start the hook at the player in both cases.
 	hook_position = grapple_origin.global_position
 	grapple_state = GrappleState.FIRING
 	grapple_rope.show()
 
 func handle_grapple_shot(delta: float) -> void:
+	# Move the end of the grapple toward either:
+	# - the collision point, or
+	# - the maximum-distance point if it missed.
 	hook_position = hook_position.move_toward(
 		grapple_hit_point,
 		GRAPPLE_HOOK_SPEED * delta
 	)
 
-	if hook_position.distance_to(grapple_hit_point) <= 1.0:
-		hook_position = grapple_hit_point
+	# Wait until the hook reaches its destination.
+	if hook_position.distance_to(grapple_hit_point) > 1.0:
+		return
+
+	hook_position = grapple_hit_point
+
+	if grapple_found_target:
+		# The hook connected, so cancel any active dash.
 		dash_time_remaining = 0.0
+
+		# Store the rope length when swinging begins.
+		grapple_rope_length = (
+			grapple_origin.global_position.distance_to(
+				grapple_hit_point
+			)
+		)
 
 		if grapple_should_pull:
 			grapple_state = GrappleState.PULLING
 		else:
 			grapple_state = GrappleState.SWINGING
+	else:
+		# The grapple reached maximum distance without
+		# finding anything, so begin bringing it back.
+		grapple_state = GrappleState.RETRACTING
 
-	grapple_rope_length = grapple_origin.global_position.distance_to(
-		grapple_hit_point
+func handle_grapple_retraction(delta: float) -> void:
+	# The player may move while the hook is retracting,
+	# so get the player's current grapple origin each frame.
+	var return_position := grapple_origin.global_position
+
+	# Bring the loose end of the grapple back toward the player.
+	hook_position = hook_position.move_toward(
+		return_position,
+		GRAPPLE_HOOK_SPEED * delta
 	)
+
+	# Once it is close enough, completely stop and hide it.
+	if hook_position.distance_to(return_position) <= 1.0:
+		stop_grapple(true)
 
 func handle_grapple_pull() -> void:
 	var distance_to_destination := global_position.distance_to(
